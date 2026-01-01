@@ -14,4 +14,4 @@ COPY handler.py /app/handler.py
 ENV HF_HOME=/runpod-volume/huggingface
 ENV NVIDIA_VISIBLE_DEVICES=all
 
-CMD ["python", "-u", "/app/handler.py"]
+CMD ["python3", "-u", "/app/handler.py"]
