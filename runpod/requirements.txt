@@ -1,0 +1,6 @@
+vllm==0.4.0
+sentence-transformers>=2.2.2
+runpod
+huggingface_hub
+torch>=2.1.0
+numpy
