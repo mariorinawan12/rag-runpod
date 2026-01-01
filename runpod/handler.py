@@ -252,6 +252,12 @@ def handler(event: Dict[str, Any]) -> Dict[str, Any]:
             return rerank_documents(input_data)
         elif action == "embed":
             return embed_text(input_data)
+        elif action == "embed_batch":
+             # Route embed_batch to embed_text (it handles list input)
+             input_data["texts"] = input_data.get("texts", [])
+             return embed_text(input_data)
+        elif action == "health_check":
+            return {"status": "ok"}
         else:
             return {"error": f"Unknown action: {action}"}
     
