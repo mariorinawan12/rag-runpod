@@ -1,14 +1,12 @@
 # GitHub Actions Workflow - Build RunPod Docker Image
-# Builds in GitHub's cloud (fast internet!) and pushes to Docker Hub
-
 name: Build RunPod Image
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - 'runpod/**'
-  workflow_dispatch:  # Manual trigger button
+  workflow_dispatch:
 
 jobs:
   build:
@@ -35,5 +33,4 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/rag-inference:latest
             ${{ secrets.DOCKER_USERNAME }}/rag-inference:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
