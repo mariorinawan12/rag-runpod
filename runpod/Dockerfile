@@ -1,34 +1,37 @@
-# RunPod Serverless - LLM + Reranker
+# RunPod Serverless - LLM + Reranker + Embedding
 # Optimized for Fast Boot with pre-downloaded models
 
-FROM runpod/pytorch:2.1.0-py3.10-cuda12.1.0-devel-ubuntu22.04
+FROM runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04
 
 WORKDIR /app
 
 # Install dependencies
 RUN pip install --no-cache-dir \
-    vllm==0.4.0 \
-    sentence-transformers>=2.2.2 \
+    vllm>=0.4.0 \
+    sentence-transformers>=3.0.0 \
     runpod \
     huggingface_hub \
-    torch>=2.1.0
+    numpy
 
-# Set HuggingFace cache to persistent volume
-ENV HF_HOME=/runpod-volume/huggingface
-ENV TRANSFORMERS_CACHE=/runpod-volume/huggingface
+# Set HuggingFace cache
+ENV HF_HOME=/root/.cache/huggingface
+ENV TRANSFORMERS_CACHE=/root/.cache/huggingface
 
-# Pre-download LLM model for Fast Boot
-RUN python -c "from huggingface_hub import snapshot_download; snapshot_download('meta-llama/Meta-Llama-3-8B-Instruct', local_dir='/app/models/llama3')"
+# Pre-download models for Fast Boot
+# LLM - Qwen 3B
+RUN python -c "from huggingface_hub import snapshot_download; snapshot_download('Qwen/Qwen2.5-3B-Instruct')"
 
-# Pre-download Reranker model for Fast Boot
+# Reranker
 RUN python -c "from sentence_transformers import CrossEncoder; CrossEncoder('BAAI/bge-reranker-v2-m3')"
+
+# Embedding
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-m3')"
 
 # Copy handler
 COPY handler.py /app/handler.py
 
-# Set environment variables
+# Environment
 ENV NVIDIA_VISIBLE_DEVICES=all
-ENV CUDA_VISIBLE_DEVICES=0
 
 # Run handler
 CMD ["python", "-u", "/app/handler.py"]
