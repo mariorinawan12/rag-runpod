@@ -1,7 +1,7 @@
 # RunPod Serverless - LLM + Reranker + Embedding
+# Models downloaded at first run (cached by RunPod Flash Boot)
 FROM nvidia/cuda:12.1.1-devel-ubuntu22.04
 
-# Install Python
 RUN apt-get update && apt-get install -y \
     python3.10 \
     python3-pip \
@@ -11,10 +11,10 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Install PyTorch first (CUDA 12.1)
+# Install PyTorch (CUDA 12.1)
 RUN pip install --no-cache-dir torch==2.1.2 --index-url https://download.pytorch.org/whl/cu121
 
-# Install other dependencies
+# Install dependencies
 RUN pip install --no-cache-dir \
     vllm==0.4.2 \
     sentence-transformers==3.0.1 \
@@ -23,16 +23,12 @@ RUN pip install --no-cache-dir \
     transformers \
     accelerate
 
-# HuggingFace cache
-ENV HF_HOME=/root/.cache/huggingface
-
-# Pre-download models
-RUN python -c "from huggingface_hub import snapshot_download; snapshot_download('Qwen/Qwen2.5-3B-Instruct')"
-RUN python -c "from sentence_transformers import CrossEncoder; CrossEncoder('BAAI/bge-reranker-v2-m3')"
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-m3')"
+# NOTE: Models downloaded at runtime, cached by RunPod Flash Boot
+# First cold start will be slower (~2-3 min), subsequent starts fast
 
 COPY handler.py /app/handler.py
 
 ENV NVIDIA_VISIBLE_DEVICES=all
+ENV HF_HOME=/runpod-volume/huggingface
 
 CMD ["python", "-u", "/app/handler.py"]
